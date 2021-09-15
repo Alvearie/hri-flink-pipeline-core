@@ -13,7 +13,7 @@ plugins {
 }
 
 group = 'org.alvearie.hri.flink'
-version = '3.0-1.0.2'
+version = 'Alpha.Dev'
 description = """HRI Flink Pipeline Core Library"""
 
 ext {
@@ -92,7 +92,7 @@ dependencies {
     // Dependencies that library users should include in their job
     // shadow jar
     // --------------------------------------------------------------
-    implementation "org.alvearie.hri:hri-api-batch-notification:3.0-2.0.1"
+    implementation "org.alvearie.hri:hri-api-batch-notification:develop-SNAPSHOT"
     implementation "org.apache.flink:flink-connector-kafka_${scalaBinaryVersion}:${flinkVersion}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     implementation "com.fasterxml.jackson.module:jackson-module-scala_${scalaBinaryVersion}:${jacksonVersion}"

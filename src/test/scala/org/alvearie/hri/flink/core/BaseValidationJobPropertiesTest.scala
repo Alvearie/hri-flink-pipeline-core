@@ -110,7 +110,7 @@ class BaseValidationJobPropertiesTest extends AnyFunSuite {
     exMsg should include ("It must have 4 elements separated by a '.'")
   }
 
-  test("getRecordCountSink() should return a HRI MgmtApiSink when calling the default constructor") {
+  test("getRecordCountSink() should return a MgmtApiSink when calling the default constructor") {
     val baseUrl = "https://mydomain.com/hri"
     val clientId = "myClientId"
     val clientSecret = "myClientSecret"

@@ -30,13 +30,13 @@ import scala.util.{Failure, Success, Try}
   description = Array("HRI JSON-only TEST validation job")
 )
 class JsonValidationJob extends Callable[Integer] with Serializable {
-  @CommandLine.Option(names = Array("-b", "--brokers"), split = ",", description = Array("Comma-separated list of Event Streams (Kafka) brokers"), required = true)
+  @CommandLine.Option(names = Array("-b", "--brokers"), split = ",", description = Array("Comma-separated list of Kafka brokers"), required = true)
   private var brokers: Array[String] = null
 
-  @CommandLine.Option(names = Array("-p", "--password"), description = Array("IBM Cloud Event Streams password"), hidden = true, required = false)
+  @CommandLine.Option(names = Array("-p", "--password"), description = Array("IBM Cloud Kafka password"), hidden = true, required = false)
   private var password: String = null
 
-  @CommandLine.Option(names = Array("-i", "--input"), description = Array("IBM Cloud Event Streams (Kafka) input topic"), required = true)
+  @CommandLine.Option(names = Array("-i", "--input"), description = Array("IBM Cloud Kafka input topic"), required = true)
   private var inputTopic: String = null
 
   @CommandLine.Option(names = Array("-d", "--batch-delay"), defaultValue = "300000", description = Array("Amount of time to wait in milliseconds for extra records before completing a batch. Default ${DEFAULT-VALUE}"))
@@ -66,7 +66,6 @@ class JsonValidationJob extends Callable[Integer] with Serializable {
 }
 
 object JsonValidationJob {
-
   def main(args: Array[String]): Unit = {
     val command = new CommandLine(new JsonValidationJob()).execute(args:_*)
     System.exit(command)

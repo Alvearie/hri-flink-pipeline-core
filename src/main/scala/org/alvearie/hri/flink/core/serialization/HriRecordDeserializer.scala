@@ -19,7 +19,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord
 class HriRecordDeserializer() extends KafkaDeserializationSchema[HriRecord] {
 
     override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): HriRecord = {
-        return new HriRecord(record.headers(), record.key(), record.value(), record.topic(), record.partition(), record.offset())
+        new HriRecord(record.headers(), record.key(), record.value(), record.topic(), record.partition(), record.offset())
     }
 
     override def isEndOfStream(nextElement: HriRecord): Boolean = false

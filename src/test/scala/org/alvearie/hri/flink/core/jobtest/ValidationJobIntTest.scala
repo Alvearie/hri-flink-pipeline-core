@@ -310,7 +310,6 @@ class ValidationJobIntTest extends AnyFlatSpec with BeforeAndAfter {
   }
 
   private def getTwoValidHriRecords(testHeaders: TestRecordHeaders, recTwoKey:String): mutable.Seq[HriRecord] = {
-
     val hriRecOne = TestHelper.createOneValidHriRecord(testHeaders,
       DefaultHriRecordKey.getBytes(StandardCharsets.UTF_8), TestHelper.ValidJsonOne)
     val hriRecTwo = TestHelper.createOneValidHriRecord(testHeaders,
