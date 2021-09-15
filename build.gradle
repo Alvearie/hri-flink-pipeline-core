@@ -1,0 +1,172 @@
+/**
+ * (C) Copyright IBM Corp. 2021
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+plugins {
+    // Apply the scala plugin to add support for Scala
+    id 'scala'
+    id 'maven-publish'
+    id "com.github.maiflai.scalatest" version "0.25"
+    id "org.scoverage" version "4.0.1"
+}
+
+group = 'org.alvearie.hri.flink'
+version = '2.1-1.0.1'
+description = """HRI Flink Pipeline Core Library"""
+
+ext {
+    javaVersion = '1.8'
+    flinkVersion = '1.10.0'
+    scalaBinaryVersion = '2.12'
+    scalaVersion = '2.12.11'
+    scalaTestVersion = '3.1.1'
+    slf4jVersion = '1.7.7'
+    log4jVersion = '1.2.17'
+    jacksonVersion = '2.12.0'
+    branch = System.getenv('TRAVIS_BRANCH') != null
+        ? System.getenv('TRAVIS_BRANCH')
+        : getWorkingBranch()
+
+}
+
+// If not running in travis add 'local' to the version to support local development
+if (System.getenv('TRAVIS_BRANCH') == null || System.getenv('TRAVIS_BRANCH') == "") {
+    version = "${branch}-local-SNAPSHOT"
+} else if (System.getenv('TRAVIS_TAG') == null || System.getenv('TRAVIS_TAG') == "") {
+    version = "${branch}-SNAPSHOT"
+} else if (System.getenv('TRAVIS_TAG') == "v${version}") {
+    version = "${version}"
+} else {
+    throw new InvalidUserDataException(String.format("The tag '%s' does not match with the current release version '%s'",System.getenv('TRAVIS_TAG'),"${version}"));
+}
+
+task jarTests(type: Jar) {
+    from sourceSets.test.output
+    archiveClassifier = 'tests'
+    archiveName "hri-flink-pipeline-core-tests.jar"
+}
+
+sourceCompatibility = javaVersion
+targetCompatibility = javaVersion
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+// declare where to find the dependencies of your project
+repositories {
+    ['TBD'].each { repo ->
+        maven {
+            credentials {
+                username = findProperty('user') ?: System.getenv('user')
+                password = findProperty('password') ?: System.getenv('password')
+            }
+
+            url "TBD/$repo/"
+        }
+    }
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    // Scala lib
+    implementation "org.scala-lang:scala-library:${scalaVersion}"
+
+    // --------------------------------------------------------------
+    // Flink dependencies that should not be included as transitive 
+    // dependencies of this library, because they should not be 
+    // included in Flink job jars.
+    // --------------------------------------------------------------
+    compileOnly "org.apache.flink:flink-scala_${scalaBinaryVersion}:${flinkVersion}"
+    compileOnly "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
+    compileOnly "log4j:log4j:${log4jVersion}"
+    compileOnly "org.slf4j:slf4j-log4j12:${slf4jVersion}"
+    testImplementation "org.apache.flink:flink-scala_${scalaBinaryVersion}:${flinkVersion}"
+    testImplementation "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
+    testImplementation "log4j:log4j:${log4jVersion}"
+    testImplementation "org.slf4j:slf4j-log4j12:${slf4jVersion}"
+
+    // --------------------------------------------------------------
+    // Dependencies that library users should include in their job
+    // shadow jar
+    // --------------------------------------------------------------
+    implementation "org.alvearie.hri:hri-api-batch-notification:2.1-2.0.1"
+    implementation "org.apache.flink:flink-connector-kafka_${scalaBinaryVersion}:${flinkVersion}"
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.module:jackson-module-scala_${scalaBinaryVersion}:${jacksonVersion}"
+    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+    implementation "org.apache.httpcomponents:httpclient:4.5.13"
+    implementation "commons-codec:commons-codec:1.15" // force upgade of httpclient dependency due to vulnerability
+
+    //Test dependencies here:
+    testImplementation "org.scalactic:scalactic_${scalaBinaryVersion}:${scalaTestVersion}"
+    testImplementation "org.scalatest:scalatest_${scalaBinaryVersion}:${scalaTestVersion}"
+    testImplementation "org.mockito:mockito-scala_${scalaBinaryVersion}:1.14.4"
+    testImplementation "org.mockito:mockito-scala-scalatest_${scalaBinaryVersion}:1.14.4"
+    testImplementation "org.apache.flink:flink-tests:${flinkVersion}:tests"
+    testImplementation "org.apache.flink:flink-test-utils_${scalaBinaryVersion}:${flinkVersion}"
+    testImplementation "org.apache.flink:flink-runtime_${scalaBinaryVersion}:${flinkVersion}:tests"
+    testImplementation "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}:tests"
+
+    testRuntimeOnly "com.vladsch.flexmark:flexmark-all:0.35.10"
+    testRuntime 'org.pegdown:pegdown:1.4.2'
+    testCompile "info.picocli:picocli:4.2.0"
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = 'hri-flink-pipeline-core'
+        }
+        mavenJava(MavenPublication) {
+            artifact jarTests
+        }
+    }
+
+    repositories {
+        maven {
+            url 'TBD'
+            credentials {
+                username findProperty('user') ?: System.getenv('user')
+                password findProperty('password') ?: System.getenv('password')
+            }
+        }
+    }
+}
+
+// this is for App Scan
+task copyDependencies(type: Copy) {
+   from configurations.default
+   into 'dependencies'
+}
+
+scoverage {
+    scoverageScalaVersion = scalaBinaryVersion
+    coverageOutputXML = true
+    coverageOutputHTML = true
+}
+reportScoverage.doLast {
+    println "Scoverage report:\n  file:///$buildDir/reports/scoverage/index.html"
+}
+
+reportScoverage.mustRunAfter test
+jarTests.dependsOn 'test'
+build.dependsOn reportScoverage
+
+/**
+ * Get the name of the working branch of the project
+ *
+ * @return Name of the working branch
+ */
+def getWorkingBranch() {
+    // Triple double-quotes for the breaklines
+    def workingBranch = """git --git-dir=${rootDir}/.git
+                               --work-tree=${rootDir}
+                               rev-parse --abbrev-ref HEAD""".execute().text.trim()
+    println "Working branch: " + workingBranch
+    return workingBranch
+}
+
