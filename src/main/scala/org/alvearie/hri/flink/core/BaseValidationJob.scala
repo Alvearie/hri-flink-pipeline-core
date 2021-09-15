@@ -272,7 +272,7 @@ class BaseValidationJob(
   // used for functional testing of the Validation Jobs without the HRI Management API.
   def getRecordCountSink(props: Properties): SinkFunction[NotificationRecord] = {
     if (useMgmtApi) {
-      log.info("Creating MgmtApiSink({}) for Tracker output", mgmtApiUrl)
+      log.info("Creating HRI MgmtApiSink({}) for Tracker output", mgmtApiUrl)
       return new MgmtApiSink(tenantId, mgmtApiUrl, mgmtClientId, mgmtClientSecret, mgmtClientAudience, oauthServiceBaseUrl)
     } else {
       log.info("Creating KafkaProducer({}) for Tracker output", notificationTopic)

@@ -62,7 +62,7 @@ class ValidationProcessFunction(
     def createMgmtClient(): BatchLookup = new MgmtClient(mgmtApiUrl, mgmtClientId, mgmtClientSecret, mgmtClientAudience, oauthServiceBaseUrl)
 
     /**
-     * constructor for testing purposes without a MgmtApiClient
+     * constructor for testing purposes without a HRI MgmtApiClient
      */
     def this(notificationDescriptor: MapStateDescriptor[String, BatchNotification],
              invalidOutputTag: OutputTag[InvalidRecord],
@@ -204,7 +204,7 @@ class ValidationProcessFunction(
                     }
                 }
             case Failure(e) =>
-                log.error("unexpected exception from mgmtClient", e)
+                log.error("unexpected exception from HRI mgmtClient", e)
                 throw new FlinkException(e)
           }
         }

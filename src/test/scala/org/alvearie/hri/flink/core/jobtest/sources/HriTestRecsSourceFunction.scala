@@ -50,7 +50,7 @@ class HriTestRecsSourceFunction() extends RichParallelSourceFunction[HriRecord] 
     }
 
     val numHriRecs = hriRecs.size
-    println(s"Starting Hri Test Recs Sources Processing of " +
+    println(s"Starting HRI Test Recs Sources Processing of " +
       s"${numHriRecs} recs at startTime: $startTime")
     val itr = hriRecs.iterator
     while(isRunning && itr.hasNext) {
