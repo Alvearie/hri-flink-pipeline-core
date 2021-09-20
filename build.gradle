@@ -56,14 +56,11 @@ tasks.withType(JavaCompile) {
 
 // declare where to find the dependencies of your project
 repositories {
-    ['TBD'].each { repo ->
-        maven {
-            credentials {
-                username = findProperty('user') ?: System.getenv('user')
-                password = findProperty('password') ?: System.getenv('password')
-            }
-
-            url "TBD/$repo/"
+    maven {
+        url = uri("https://maven.pkg.github.com/Alvearie/hri-api-spec")
+        credentials {
+            username = findProperty('user') ?: System.getenv('USER')
+            password = findProperty('password') ?: System.getenv('PASSWORD')
         }
     }
     mavenCentral()
@@ -75,8 +72,8 @@ dependencies {
     implementation "org.scala-lang:scala-library:${scalaVersion}"
 
     // --------------------------------------------------------------
-    // Flink dependencies that should not be included as transitive 
-    // dependencies of this library, because they should not be 
+    // Flink dependencies that should not be included as transitive
+    // dependencies of this library, because they should not be
     // included in Flink job jars.
     // --------------------------------------------------------------
     compileOnly "org.apache.flink:flink-scala_${scalaBinaryVersion}:${flinkVersion}"
@@ -92,7 +89,7 @@ dependencies {
     // Dependencies that library users should include in their job
     // shadow jar
     // --------------------------------------------------------------
-    implementation "org.alvearie.hri:hri-api-batch-notification:develop-SNAPSHOT"
+    implementation "org.alvearie.hri:hri-api-batch-notification:WHFHRI-693-SNAPSHOT"
     implementation "org.apache.flink:flink-connector-kafka_${scalaBinaryVersion}:${flinkVersion}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     implementation "com.fasterxml.jackson.module:jackson-module-scala_${scalaBinaryVersion}:${jacksonVersion}"
@@ -117,21 +114,18 @@ dependencies {
 
 publishing {
     publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            artifactId = 'hri-flink-pipeline-core'
-        }
-        mavenJava(MavenPublication) {
-            artifact jarTests
+        gpr(MavenPublication) {
+            from(components.java)
         }
     }
 
     repositories {
         maven {
-            url 'TBD'
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Alvearie/hri-flink-pipeline-core")
             credentials {
-                username findProperty('user') ?: System.getenv('user')
-                password findProperty('password') ?: System.getenv('password')
+                username = findProperty('user') ?: System.getenv('USER')
+                password = findProperty('password') ?: System.getenv('PASSWORD')
             }
         }
     }
@@ -169,4 +163,3 @@ def getWorkingBranch() {
     println "Working branch: " + workingBranch
     return workingBranch
 }
-
