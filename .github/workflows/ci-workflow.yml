@@ -11,16 +11,18 @@ concurrency: ci-${{ github.ref }}
 
 jobs:
   buildAndTest:
-    name: Build and Test
+    name: Build, Test, and Package
     runs-on: ubuntu-latest
     env:
       RESOURCE_GROUP: hri-dev1-wdc-kube
     steps:
       - uses: actions/checkout@v2
+
       - name: Install IBM Dev Tools & DevOps Insights CLI plug-in
         run: |
           curl -sL https://ibm.biz/idt-installer | bash
           ibmcloud plugin install doi
+
       - name: Log into IBM Cloud
         shell: bash
         env:
@@ -28,17 +30,24 @@ jobs:
         run: |
           IBMCLOUD_API_KEY="$CLOUD_API_KEY" ibmcloud login -r us-south || { echo 'IBM Cloud CLI login failed!'; exit 1; }
           ibmcloud target -g ${RESOURCE_GROUP}
+
       - name: Set up adoptopenjdk8
         uses: actions/setup-java@v2
         with:
           java-version: '8'
           distribution: 'adopt'
           cache: 'gradle'
-      - name: Gradle build and publish
+
+      - name: Gradle build
         env:
           USER: ${{ secrets.USER }}
           PASSWORD: ${{ secrets.ACCESS_TOKEN }}
         run: |
           chmod +x ./gradlew
           ./gradlew clean build
-          gradle publish
+
+      - name: Gradle build and publish
+        env:
+          USER: ${{ secrets.USER }}
+          PASSWORD: ${{ secrets.ACCESS_TOKEN }}
+        run: gradle publish
