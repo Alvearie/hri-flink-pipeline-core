@@ -46,8 +46,8 @@ jobs:
           chmod +x ./gradlew
           ./gradlew clean build
 
-      - name: Gradle build and publish
+      - name: Gradle publish
         env:
           USER: ${{ secrets.USER }}
           PASSWORD: ${{ secrets.ACCESS_TOKEN }}
-        run: gradle publish
+        run: gradle publish --stacktrace
