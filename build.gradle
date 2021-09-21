@@ -109,7 +109,7 @@ dependencies {
     testImplementation "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}:tests"
 
     testRuntimeOnly "com.vladsch.flexmark:flexmark-all:0.35.10"
-    testRuntime 'org.pegdown:pegdown:1.4.2'
+    testRuntimeOnly 'org.pegdown:pegdown:1.4.2'
     testCompile "info.picocli:picocli:4.2.0"
 }
 
