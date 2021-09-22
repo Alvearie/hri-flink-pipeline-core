@@ -1,11 +1,7 @@
 name: CI Workflow
 
 on:
-  push:
-    branches: [ '**' ]
-  pull_request:
-    branches: [ '**' ]
-  workflow_dispatch:
+  [push, workflow_dispatch]
 
 concurrency: ci-${{ github.ref }}
 
