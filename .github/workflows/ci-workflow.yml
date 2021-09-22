@@ -12,6 +12,9 @@ jobs:
     env:
       RESOURCE_GROUP: hri-dev1-wdc-kube
     steps:
+      - Set branch name
+        uses: nelonoel/branch-name@v1.0.1
+
       - uses: actions/checkout@v2
 
       - name: Install IBM Dev Tools & DevOps Insights CLI plug-in

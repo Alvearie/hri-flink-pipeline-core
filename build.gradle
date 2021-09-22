@@ -25,14 +25,13 @@ ext {
     slf4jVersion = '1.7.7'
     log4jVersion = '1.2.17'
     jacksonVersion = '2.12.0'
-    branch = System.getenv('ACTIONS_BRANCH') != null
-        ? System.getenv('ACTIONS_BRANCH')
+    branch = System.getenv('BRANCH_NAME') != null
+        ? System.getenv('BRANCH_NAME')
         : getWorkingBranch()
-
 }
 
 // If not running in travis add 'local' to the version to support local development
-if (System.getenv('ACTIONS_BRANCH') == null || System.getenv('ACTIONS_BRANCH') == "") {
+if (System.getenv('BRANCH_NAME') == null || System.getenv('BRANCH_NAME') == "") {
     version = "${branch}-local-SNAPSHOT"
 } else if (System.getenv('ACTIONS_TAG') == null || System.getenv('ACTIONS_TAG') == "") {
     version = "${branch}-SNAPSHOT"
