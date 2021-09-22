@@ -20,19 +20,6 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Install IBM Dev Tools & DevOps Insights CLI plug-in
-        run: |
-          curl -sL https://ibm.biz/idt-installer | bash
-          ibmcloud plugin install doi
-
-      - name: Log into IBM Cloud
-        shell: bash
-        env:
-          CLOUD_API_KEY: ${{ secrets.CLOUD_API_KEY }}
-        run: |
-          IBMCLOUD_API_KEY="$CLOUD_API_KEY" ibmcloud login -r us-south || { echo 'IBM Cloud CLI login failed!'; exit 1; }
-          ibmcloud target -g ${RESOURCE_GROUP}
-
       - name: Set up adoptopenjdk8
         uses: actions/setup-java@v2
         with:
