@@ -12,7 +12,7 @@ jobs:
     env:
       RESOURCE_GROUP: hri-dev1-wdc-kube
     steps:
-      - Set branch name
+      - name: Set branch name
         uses: nelonoel/branch-name@v1.0.1
 
       - uses: actions/checkout@v2
