@@ -26,21 +26,21 @@ ext {
     slf4jVersion = '1.7.7'
     log4jVersion = '1.2.17'
     jacksonVersion = '2.12.0'
-    branch = System.getenv('TRAVIS_BRANCH') != null
-        ? System.getenv('TRAVIS_BRANCH')
+    branch = System.getenv('ACTIONS_BRANCH') != null
+        ? System.getenv('ACTIONS_BRANCH')
         : getWorkingBranch()
 
 }
 
 // If not running in travis add 'local' to the version to support local development
-if (System.getenv('TRAVIS_BRANCH') == null || System.getenv('TRAVIS_BRANCH') == "") {
+if (System.getenv('ACTIONS_BRANCH') == null || System.getenv('ACTIONS_BRANCH') == "") {
     version = "${branch}-local-SNAPSHOT"
-} else if (System.getenv('TRAVIS_TAG') == null || System.getenv('TRAVIS_TAG') == "") {
+} else if (System.getenv('ACTIONS_TAG') == null || System.getenv('ACTIONS_TAG') == "") {
     version = "${branch}-SNAPSHOT"
-} else if (System.getenv('TRAVIS_TAG') == "v${version}") {
+} else if (System.getenv('ACTIONS_TAG') == "v${version}") {
     version = "${version}"
 } else {
-    throw new InvalidUserDataException(String.format("The tag '%s' does not match with the current release version '%s'",System.getenv('TRAVIS_TAG'),"${version}"));
+    throw new InvalidUserDataException(String.format("The tag '%s' does not match with the current release version '%s'",System.getenv('ACTIONS_TAG'),"${version}"));
 }
 
 task jarTests(type: Jar) {
@@ -60,8 +60,8 @@ repositories {
     maven {
         url = uri("https://maven.pkg.github.com/Alvearie/hri-api-spec")
         credentials {
-            username = findProperty('user') ?: System.getenv('USER')
-            password = findProperty('password') ?: System.getenv('PASSWORD')
+            username = System.getenv('USER')
+            password = System.getenv('PASSWORD')
         }
     }
     mavenCentral()
@@ -125,8 +125,8 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/Alvearie/hri-flink-pipeline-core")
             credentials {
-                username = findProperty('user') ?: System.getenv('USER')
-                password = findProperty('password') ?: System.getenv('PASSWORD')
+                username = System.getenv('USER')
+                password = System.getenv('PASSWORD')
             }
         }
     }
