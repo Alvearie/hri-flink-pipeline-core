@@ -6,7 +6,6 @@
 
 plugins {
     // Apply the scala plugin to add support for Scala
-//    id 'java' // For gradle plugin
     id 'scala'
     id 'maven-publish'
     id "com.github.maiflai.scalatest" version "0.25"
