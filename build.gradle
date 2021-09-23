@@ -116,6 +116,13 @@ publishing {
         gpr(MavenPublication) {
             from(components.java)
         }
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = 'hri-flink-pipeline-core'
+        }
+        mavenJava(MavenPublication) {
+            artifact jarTests
+        }
     }
 
     repositories {
