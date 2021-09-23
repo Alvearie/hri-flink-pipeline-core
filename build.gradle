@@ -22,7 +22,7 @@ ext {
     scalaBinaryVersion = '2.12'
     scalaVersion = '2.12.11'
     scalaTestVersion = '3.1.1'
-    slf4jVersion = '1.7.7'
+    slf4jVersion = '1.7.32'
     log4jVersion = '1.2.17'
     jacksonVersion = '2.12.0'
     branch = System.getenv('BRANCH_NAME') != null
@@ -121,18 +121,14 @@ dependencies {
     testImplementation "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}:tests"
 
     testRuntimeOnly "com.vladsch.flexmark:flexmark-all:0.35.10"
-    testRuntimeOnly 'org.pegdown:pegdown:1.4.2'
-    testImplementation "info.picocli:picocli:4.2.0"
+    testRuntimeOnly 'org.pegdown:pegdown:1.6.0'
+    testImplementation 'info.picocli:picocli:4.6.1'
 }
 
 publishing {
     publications {
         gpr(MavenPublication) {
-            from components.java
-            artifactId = 'hri-flink-pipeline-core'
-        }
-        gpr(MavenPublication) {
-            artifact jarTests
+            from(components.java)
         }
     }
 
