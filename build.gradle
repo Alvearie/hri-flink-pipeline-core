@@ -54,6 +54,20 @@ tasks.withType(JavaCompile) {
 }
 
 // declare where to find the dependencies of your project
+allprojects {
+    repositories {
+        maven {
+            url = uri("https://maven.pkg.github.com/Alvearie/hri-api-spec")
+            credentials {
+                username = System.getenv('USER')
+                password = System.getenv('PASSWORD')
+            }
+        }
+        mavenCentral()
+        mavenLocal()
+    }
+}
+
 repositories {
     maven {
         url = uri("https://maven.pkg.github.com/Alvearie/hri-api-spec")
@@ -114,13 +128,10 @@ dependencies {
 publishing {
     publications {
         gpr(MavenPublication) {
-            from(components.java)
-        }
-        mavenJava(MavenPublication) {
             from components.java
             artifactId = 'hri-flink-pipeline-core'
         }
-        mavenJava(MavenPublication) {
+        gpr(MavenPublication) {
             artifact jarTests
         }
     }
@@ -148,6 +159,7 @@ scoverage {
     coverageOutputXML = true
     coverageOutputHTML = true
 }
+
 reportScoverage.doLast {
     println "Scoverage report:\n  file:///$buildDir/reports/scoverage/index.html"
 }
