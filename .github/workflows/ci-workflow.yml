@@ -38,4 +38,4 @@ jobs:
       - name: Gradle publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gradle publish --stacktrace
+        run: ./gradlew publish --stacktrace
