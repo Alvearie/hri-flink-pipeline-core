@@ -37,6 +37,5 @@ jobs:
 
       - name: Gradle publish
         env:
-          USER: ${{ secrets.USER }}
-          PASSWORD: ${{ secrets.ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gradle publish --stacktrace
