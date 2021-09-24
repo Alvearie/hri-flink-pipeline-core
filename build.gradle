@@ -132,9 +132,9 @@ publishing {
             artifactId = 'hri-flink-pipeline-core'
         }
 
-//        mavenJava(MavenPublication) {
-//            artifact jarTests
-//        }        
+       mavenJava(MavenPublication) {
+           artifact jarTests
+       }        
     }
 
     repositories {
