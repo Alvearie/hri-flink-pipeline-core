@@ -127,8 +127,9 @@ dependencies {
 
 publishing {
     publications {
-        gpr(MavenPublication) {
-            from(components.java)
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = 'hri-flink-pipeline-core'
         }
     }
 
