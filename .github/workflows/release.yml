@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags: [ '**' ]
+  workflow_dispatch:
+
+concurrency: release-${{ github.ref }}
+
+env:
+  IMAGE_NAME: hri-flink-pipeline-core
+
+jobs:
+  buildAndRelease:
+    name: Gradle Build and Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set branch name
+        uses: nelonoel/branch-name@v1.0.1
+
+      - uses: actions/checkout@v2
+
+      - name: Set up adoptopenjdk8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+          cache: 'gradle'
+
+      - name: Gradle build
+        run: |
+          chmod +x ./gradlew
+          ./gradlew clean build
+
+      - name: Gradle publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew publish --stacktrace
