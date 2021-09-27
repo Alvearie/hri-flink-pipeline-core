@@ -59,8 +59,11 @@ allprojects {
         maven {
             url = uri("https://maven.pkg.github.com/Alvearie/hri-api-spec")
             credentials {
-                username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
-                password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
+                // TODO:  REVERT BEFORE MERGE
+                username = System.getenv("USER")
+                password = System.getenv("ACCESS_TOKEN")
+//                username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
+//                password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
             }
         }
         mavenCentral()
@@ -72,8 +75,11 @@ repositories {
     maven {
         url = uri("https://maven.pkg.github.com/Alvearie/hri-api-spec")
         credentials {
-            username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
-            password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
+            // TODO:  REVERT BEFORE MERGE
+            username = System.getenv("USER")
+            password = System.getenv("ACCESS_TOKEN")
+//            username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
+//            password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
         }
     }
     mavenCentral()
@@ -142,8 +148,11 @@ publishing {
             name = "GitHubPackages"
             url = uri("https://maven.pkg.github.com/Alvearie/hri-flink-pipeline-core")
             credentials {
-                username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
-                password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
+                // TODO:  REVERT BEFORE MERGE
+                username = System.getenv("USER")
+                password = System.getenv("ACCESS_TOKEN")
+//                username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
+//                password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
             }
         }
     }
