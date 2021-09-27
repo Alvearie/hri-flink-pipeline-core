@@ -29,7 +29,6 @@ jobs:
 
       - name: Gradle build
         run: |
-          chmod +x ./gradlew
           ./gradlew clean build
 
       - name: Gradle publish
