@@ -53,33 +53,15 @@ tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
 }
 
-// declare where to find the dependencies of your project
-allprojects {
-    repositories {
-        maven {
-            url = uri("https://maven.pkg.github.com/Alvearie/hri-api-spec")
-            credentials {
-                // TODO:  REVERT BEFORE MERGE
-                // username = System.getenv("USER")
-                // password = System.getenv("ACCESS_TOKEN")
-               username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
-               password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
-            }
-        }
-        mavenCentral()
-        mavenLocal()
-    }
-}
-
 repositories {
     maven {
         url = uri("https://maven.pkg.github.com/Alvearie/hri-api-spec")
         credentials {
-            // TODO:  REVERT BEFORE MERGE
-            username = System.getenv("USER")
-            password = System.getenv("ACCESS_TOKEN")
-//            username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
-//            password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
+            // // TODO:  REVERT BEFORE MERGE
+            // username = System.getenv("USER")
+            // password = System.getenv("ACCESS_TOKEN")
+           username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
+           password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
         }
     }
     mavenCentral()
@@ -108,7 +90,7 @@ dependencies {
     // Dependencies that library users should include in their job
     // shadow jar
     // --------------------------------------------------------------
-    implementation "org.alvearie.hri:hri-api-batch-notification:WHFHRI-693-SNAPSHOT"
+    implementation "org.alvearie.hri:hri-api-batch-notification:develop-SNAPSHOT"
     implementation "org.apache.flink:flink-connector-kafka_${scalaBinaryVersion}:${flinkVersion}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     implementation "com.fasterxml.jackson.module:jackson-module-scala_${scalaBinaryVersion}:${jacksonVersion}"
