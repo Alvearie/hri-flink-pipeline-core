@@ -16,7 +16,7 @@ jobs:
       RESOURCE_GROUP: hri-dev1-wdc-kube
 
     steps:
-      - name: Set branch name
+      - name: Set branch name environment variable
         uses: nelonoel/branch-name@v1.0.1
 
       - uses: actions/checkout@v2
@@ -36,11 +36,10 @@ jobs:
 
       - name: Gradle build
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
-        run: |
-          ./gradlew clean build
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew clean build
 
       - name: Gradle publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew publish --stacktrace
+        run: ./gradlew publish

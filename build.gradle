@@ -13,7 +13,7 @@ plugins {
 }
 
 group = 'org.alvearie.hri.flink'
-version = 'Alpha.Dev'
+version = 'Alpha.Dev' // Update version number in releases
 description = """HRI Flink Pipeline Core Library"""
 
 ext {
@@ -30,7 +30,13 @@ ext {
         : getWorkingBranch()
 }
 
-// If not running in travis add 'local' to the version to support local development
+/**
+ * Set the version name
+ * - If developing locally, no BRANCH_NAME should be set and the version suffix is "-local-SNAPSHOT"
+ * - If pushing to a branch, no ACTIONS_TAG should be set and the version suffix is "-SNAPSHOT"
+ * - If pushing to a tag, the tag should match the version number, and the version number is now the version name.
+ * Note: The "should be set" variables are attempted to be set in ci-workflow.yml.
+ */
 if (System.getenv('BRANCH_NAME') == null || System.getenv('BRANCH_NAME') == "") {
     version = "${branch}-local-SNAPSHOT"
 } else if (System.getenv('ACTIONS_TAG') == null || System.getenv('ACTIONS_TAG') == "") {
@@ -156,6 +162,5 @@ def getWorkingBranch() {
     def workingBranch = """git --git-dir=${rootDir}/.git
                                --work-tree=${rootDir}
                                rev-parse --abbrev-ref HEAD""".execute().text.trim()
-    println "Working branch: " + workingBranch
     return workingBranch
 }
