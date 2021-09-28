@@ -3,6 +3,7 @@ name: CI Workflow
 on:
   push:
     branches: [ '**' ]
+    tags: [ '**' ]
   workflow_dispatch:
 
 concurrency: ci-${{ github.ref }}
