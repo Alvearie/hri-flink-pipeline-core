@@ -63,11 +63,8 @@ repositories {
     maven {
         url = uri("https://maven.pkg.github.com/Alvearie/hri-api-spec")
         credentials {
-            // // TODO:  REVERT BEFORE MERGE
-            // username = System.getenv("USER")
-            // password = System.getenv("ACCESS_TOKEN")
-           username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
-           password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
+            username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
+            password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
         }
     }
     mavenCentral()
