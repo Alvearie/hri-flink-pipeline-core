@@ -40,7 +40,7 @@ jobs:
         run: ./gradlew clean build
 
 #      TODO: Add SonarCloud (Static Code) scan after permissions issue is fixed
-      - name: SonarCloud Scan
+#      - name: SonarCloud Scan
 #          uses: sonarsource/sonarcloud-github-action@v1.6
 #          with:
 #            projectBaseDir: ./src
