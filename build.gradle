@@ -120,19 +120,8 @@ publishing {
             artifactId = 'hri-flink-pipeline-core'
         }
 
-       mavenJava(MavenPublication) {
-           artifact jarTests
-       }        
-    }
-
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/Alvearie/hri-flink-pipeline-core")
-            credentials {
-               username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
-               password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
-            }
+        mavenJava(MavenPublication) {
+            artifact jarTests
         }
     }
 }
