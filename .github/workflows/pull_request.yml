@@ -1,0 +1,36 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    types: [opened]
+  pull_request_review:
+    types: [submitted]
+  workflow_dispatch:
+
+concurrency: pr-${{ github.ref }}
+
+jobs:
+  dependency-checks:
+    name: Dependency Checks
+    runs-on: ubuntu-latest
+    env:
+      RESOURCE_GROUP: hri-dev1-wdc-kube
+
+    steps:
+      - name: Set branch name environment variable
+        uses: nelonoel/branch-name@v1.0.1
+
+      - uses: actions/checkout@v2
+
+#      TODO:  Add vulnerability check, sonatype OpenSource check
+
+      - uses: actions/github-script@v4
+        if: ${{ env.VULNERABILITIES != 0 }}
+        with:
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "## ⚠️ Vulnerabilities found in dependencies.\nSee the 'PR -> Vulnerability Checks' logs for more details: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            })
