@@ -21,6 +21,9 @@ jobs:
 
       - uses: actions/checkout@v2
 
+      - name: Copyright Check
+        run: ./copyrightCheck.sh
+
       - name: Set up adoptopenjdk8
         uses: actions/setup-java@v2
         with:
