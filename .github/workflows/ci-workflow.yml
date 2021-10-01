@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Set branch name environment variable
-        uses: echo "BRANCH_NAME=$(echo ${{github.event.pull_request.head.ref}} | tr / -)" >> $GITHUB_ENV
+        uses: nelonoel/branch-name@v1.0.1
 
       - uses: actions/checkout@v2
 
