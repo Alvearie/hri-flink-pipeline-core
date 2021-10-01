@@ -12,28 +12,42 @@ concurrency: pr-${{ github.ref }}
 jobs:
   dependency-checks:
     name: Dependency Checks
+    # run if the PR was opened or there was a comment containing '/pr_checks'
+    if: (github.event_name == 'pull_request') || (github.event_name == 'pull_request_review' && contains(github.event.review.body, '/pr_checks'))
     runs-on: ubuntu-latest
     env:
       RESOURCE_GROUP: hri-dev1-wdc-kube
 
     steps:
       - name: Set branch name environment variable
-        uses: echo "BRANCH_NAME=$(echo ${{github.event.pull_request.head.ref}} | tr / -)" >> $GITHUB_ENV
+        run: echo "BRANCH_NAME=$(echo ${{github.event.pull_request.head.ref}} | tr / -)" >> $GITHUB_ENV
 
       - uses: actions/checkout@v2
 
+      - name: Set up adoptopenjdk8
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'adopt-hotspot'
+          cache: 'gradle'
+
+      - name: Gradle build
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew clean build publishToMavenLocal
+
       - name: Check OpenSource Dependencies
-          # override default -eo pipefail
-          shell: bash --noprofile --norc {0}
-          env:
-            SONATYPE_OSS_PASSWORD: ${{ secrets.SONATYPE_OSS_PASSWORD }}
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          run: |
-            ./gradlew ossIndexAudit --info
-            found=$?
-            echo "VULNERABILITIES=$found" >> $GITHUB_ENV
-            [[ "$found" == 1 ]] && echo "::error ::Vulnerabilities found in dependencies."
-            exit 0
+        # override default -eo pipefail
+        shell: bash --noprofile --norc {0}
+        env:
+          SONATYPE_OSS_PASSWORD: ${{ secrets.SONATYPE_OSS_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ./gradlew ossIndexAudit --info
+          found=$?
+          echo "VULNERABILITIES=$found" >> $GITHUB_ENV
+          [[ "$found" == 1 ]] && echo "::error ::Vulnerabilities found in dependencies."
+          exit 0
 
       - uses: actions/github-script@v4
         if: ${{ env.VULNERABILITIES != 0 }}
