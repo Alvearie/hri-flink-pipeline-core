@@ -4,19 +4,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.sonatype.gradle.plugins:scan-gradle-plugin:2.2.0"
+    }
+}
+
 plugins {
     // Apply the scala plugin to add support for Scala
     id 'scala'
     id 'maven-publish'
     id "com.github.maiflai.scalatest" version "0.25"
     id "org.scoverage" version "4.0.1"
+    id "org.sonatype.gradle.plugins.scan" version "2.2.0"
 }
 
 group = 'org.alvearie.hri.flink'
 version = 'Alpha.Dev' // Update version number in releases
 description = """HRI Flink Pipeline Core Library"""
-
-apply plugin: "org.sonatype.gradle.plugins.scan"
 
 ext {
     javaVersion = '1.8'
