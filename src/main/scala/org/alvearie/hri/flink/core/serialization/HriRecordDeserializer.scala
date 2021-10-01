@@ -27,5 +27,3 @@ class HriRecordDeserializer() extends KafkaDeserializationSchema[HriRecord] {
     override def getProducedType: TypeInformation[HriRecord] = TypeInformation.of(classOf[HriRecord])
 
 }
-
-// Smol change
