@@ -16,6 +16,8 @@ group = 'org.alvearie.hri.flink'
 version = 'Alpha.Dev' // Update version number in releases
 description = """HRI Flink Pipeline Core Library"""
 
+apply plugin: "org.sonatype.gradle.plugins.scan"
+
 ext {
     javaVersion = '1.8'
     flinkVersion = '1.10.0'
