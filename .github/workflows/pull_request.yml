@@ -18,11 +18,22 @@ jobs:
 
     steps:
       - name: Set branch name environment variable
-        uses: nelonoel/branch-name@v1.0.1
+        uses: echo "BRANCH_NAME=$(echo ${{github.event.pull_request.head.ref}} | tr / -)" >> $GITHUB_ENV
 
       - uses: actions/checkout@v2
 
-#      TODO:  Add vulnerability check, sonatype OpenSource check
+      - name: Check OpenSource Dependencies
+          # override default -eo pipefail
+          shell: bash --noprofile --norc {0}
+          env:
+            SONATYPE_OSS_PASSWORD: ${{ secrets.SONATYPE_OSS_PASSWORD }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            ./gradlew ossIndexAudit --info
+            found=$?
+            echo "VULNERABILITIES=$found" >> $GITHUB_ENV
+            [[ "$found" == 1 ]] && echo "::error ::Vulnerabilities found in dependencies."
+            exit 0
 
       - uses: actions/github-script@v4
         if: ${{ env.VULNERABILITIES != 0 }}
