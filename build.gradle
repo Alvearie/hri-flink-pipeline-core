@@ -4,16 +4,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.sonatype.gradle.plugins:scan-gradle-plugin:2.2.0"
+    }
+}
+
 plugins {
     // Apply the scala plugin to add support for Scala
     id 'scala'
     id 'maven-publish'
     id "com.github.maiflai.scalatest" version "0.25"
     id "org.scoverage" version "4.0.1"
+    id "org.sonatype.gradle.plugins.scan" version "2.2.0"
 }
 
 group = 'org.alvearie.hri.flink'
-version = 'Alpha.Dev'
+version = 'Alpha.Dev' // Update version number in releases
 description = """HRI Flink Pipeline Core Library"""
 
 ext {
@@ -22,24 +32,29 @@ ext {
     scalaBinaryVersion = '2.12'
     scalaVersion = '2.12.11'
     scalaTestVersion = '3.1.1'
-    slf4jVersion = '1.7.7'
+    slf4jVersion = '1.7.32'
     log4jVersion = '1.2.17'
     jacksonVersion = '2.12.0'
-    branch = System.getenv('TRAVIS_BRANCH') != null
-        ? System.getenv('TRAVIS_BRANCH')
+    branch = System.getenv('BRANCH_NAME') != null
+        ? System.getenv('BRANCH_NAME')
         : getWorkingBranch()
-
 }
 
-// If not running in travis add 'local' to the version to support local development
-if (System.getenv('TRAVIS_BRANCH') == null || System.getenv('TRAVIS_BRANCH') == "") {
+/**
+ * Set the version name
+ * - If developing locally, no BRANCH_NAME should be set and the version suffix is "-local-SNAPSHOT"
+ * - If pushing to a branch, no ACTIONS_TAG should be set and the version suffix is "-SNAPSHOT"
+ * - If pushing to a tag, the tag should match the version number, and the version number is now the version name.
+ * Note: The "should be set" variables are attempted to be set in ci-workflow.yml.
+ */
+if (System.getenv('BRANCH_NAME') == null || System.getenv('BRANCH_NAME') == "") {
     version = "${branch}-local-SNAPSHOT"
-} else if (System.getenv('TRAVIS_TAG') == null || System.getenv('TRAVIS_TAG') == "") {
+} else if (System.getenv('ACTIONS_TAG') == null || System.getenv('ACTIONS_TAG') == "") {
     version = "${branch}-SNAPSHOT"
-} else if (System.getenv('TRAVIS_TAG') == "v${version}") {
+} else if (System.getenv('ACTIONS_TAG') == "v${version}") {
     version = "${version}"
 } else {
-    throw new InvalidUserDataException(String.format("The tag '%s' does not match with the current release version '%s'",System.getenv('TRAVIS_TAG'),"${version}"));
+    throw new InvalidUserDataException(String.format("The tag '%s' does not match with the current release version '%s'",System.getenv('ACTIONS_TAG'),"${version}"));
 }
 
 task jarTests(type: Jar) {
@@ -54,16 +69,12 @@ tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
 }
 
-// declare where to find the dependencies of your project
 repositories {
-    ['TBD'].each { repo ->
-        maven {
-            credentials {
-                username = findProperty('user') ?: System.getenv('user')
-                password = findProperty('password') ?: System.getenv('password')
-            }
-
-            url "TBD/$repo/"
+    maven {
+        url = uri("https://maven.pkg.github.com/Alvearie/hri-api-spec")
+        credentials {
+            username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
+            password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
         }
     }
     mavenCentral()
@@ -75,8 +86,8 @@ dependencies {
     implementation "org.scala-lang:scala-library:${scalaVersion}"
 
     // --------------------------------------------------------------
-    // Flink dependencies that should not be included as transitive 
-    // dependencies of this library, because they should not be 
+    // Flink dependencies that should not be included as transitive
+    // dependencies of this library, because they should not be
     // included in Flink job jars.
     // --------------------------------------------------------------
     compileOnly "org.apache.flink:flink-scala_${scalaBinaryVersion}:${flinkVersion}"
@@ -111,8 +122,8 @@ dependencies {
     testImplementation "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}:tests"
 
     testRuntimeOnly "com.vladsch.flexmark:flexmark-all:0.35.10"
-    testRuntime 'org.pegdown:pegdown:1.4.2'
-    testCompile "info.picocli:picocli:4.2.0"
+    testRuntimeOnly 'org.pegdown:pegdown:1.6.0'
+    testImplementation 'info.picocli:picocli:4.6.1'
 }
 
 publishing {
@@ -121,6 +132,7 @@ publishing {
             from components.java
             artifactId = 'hri-flink-pipeline-core'
         }
+
         mavenJava(MavenPublication) {
             artifact jarTests
         }
@@ -128,10 +140,11 @@ publishing {
 
     repositories {
         maven {
-            url 'TBD'
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Alvearie/hri-flink-pipeline-core")
             credentials {
-                username findProperty('user') ?: System.getenv('user')
-                password findProperty('password') ?: System.getenv('password')
+               username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
+               password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
             }
         }
     }
@@ -148,6 +161,7 @@ scoverage {
     coverageOutputXML = true
     coverageOutputHTML = true
 }
+
 reportScoverage.doLast {
     println "Scoverage report:\n  file:///$buildDir/reports/scoverage/index.html"
 }
@@ -166,7 +180,5 @@ def getWorkingBranch() {
     def workingBranch = """git --git-dir=${rootDir}/.git
                                --work-tree=${rootDir}
                                rev-parse --abbrev-ref HEAD""".execute().text.trim()
-    println "Working branch: " + workingBranch
     return workingBranch
 }
-

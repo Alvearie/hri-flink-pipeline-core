@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package org.alvearien.hri.flink.core.serialization
+package org.alvearie.hri.flink.core.serialization
 
 import java.io.{ObjectInputStream, ObjectOutputStream}
 
