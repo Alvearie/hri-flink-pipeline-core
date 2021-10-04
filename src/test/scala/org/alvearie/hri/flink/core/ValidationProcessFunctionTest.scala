@@ -157,7 +157,7 @@ class ValidationProcessFunctionTest extends AnyFunSuite with MockitoSugar {
     verify(mockClient, times(1)).getBatchId(tenantId, DefaultTestBatchId)
   }
 
-  test("processElement should call getBatch and unexpected error should be thrown from mgmtApi") {
+  test("processElement should call getBatch and unexpected error should be thrown from HRI mgmtApi") {
     val mockClient = mock[MgmtClient]
 
     val validator = new TestValidationProcessFunction(

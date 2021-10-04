@@ -8,7 +8,6 @@ package org.alvearie.hri.flink.core
 
 import java.time.OffsetDateTime
 import java.util.concurrent.TimeUnit
-
 import org.alvearie.hri.api.BatchNotification.Status
 import org.alvearie.hri.api.{BatchNotification, MgmtClient, RequestException}
 import org.alvearie.hri.flink.core.serialization.NotificationRecord
@@ -165,6 +164,15 @@ class MgmtApiSinkTest extends AnyFunSuite with MockitoSugar{
 
     val exMsg = caught.getMessage
     exMsg should equal("Call to HRI Management API failed: Unauthorized.")
+  }
+
+  test("it should throw a FlinkException when environment variables are incorrect") {
+    TestHelper.setEnv(MgmtClient.trustStoreEnv, "bad/path/to/truststore.jks")
+
+    val sink = new MgmtApiSink("tenant", "https://hri-mgmt-api", "client_id", "password", "audience", "https://oauth")
+    assertThrows[FlinkException](sink.createMgmtClient())
+
+    TestHelper.removeEnv(MgmtClient.trustStoreEnv)
   }
 
   def createTestBatchNotification(status: BatchNotification.Status, actualRecordCount: Int, invalidRecordCount: Int, failMsg: String): BatchNotification = {

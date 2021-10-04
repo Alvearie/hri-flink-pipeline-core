@@ -31,7 +31,14 @@ class MgmtApiSink(val tenantId: String, val mgmtApiUrl: String, val mgmtClientId
   @transient lazy val mgmtClient: MgmtClient = createMgmtClient()
 
   // This enables overriding for testing
-  def createMgmtClient(): MgmtClient = new MgmtClient(mgmtApiUrl, mgmtClientId, mgmtClientSecret, mgmtClientAudience, oauthServiceBaseUrl)
+  def createMgmtClient(): MgmtClient = {
+    try {
+      new MgmtClient(mgmtApiUrl, mgmtClientId, mgmtClientSecret, mgmtClientAudience, oauthServiceBaseUrl)
+    } catch {
+      case ex: Throwable =>
+        throw new FlinkException(ex) // can't recover from this
+    }
+  }
 
   override def invoke(record: NotificationRecord, context: Context[_]): Unit = {
     val batch = record.value

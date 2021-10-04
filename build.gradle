@@ -23,7 +23,7 @@ plugins {
 }
 
 group = 'org.alvearie.hri.flink'
-version = '2.1-1.0.1'
+version = '3.0-1.0.2'
 description = """HRI Flink Pipeline Core Library"""
 
 ext {
