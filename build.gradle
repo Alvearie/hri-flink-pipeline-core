@@ -146,7 +146,6 @@ publishing {
             from components.java
             artifactId = 'hri-flink-pipeline-core'
         }
-
         mavenJava(MavenPublication) {
             artifact jarTests
         }
