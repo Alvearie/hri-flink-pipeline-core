@@ -18,17 +18,14 @@ import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import org.alvearie.hri.flink.core.serialization.NotificationDeserializer
-import org.apache.http.ssl.SSLContexts
-
 import java.util.Base64
 import java.util.ArrayList
 import org.slf4j.LoggerFactory
 
-import java.io.{File, FileNotFoundException}
 import scala.util.{Failure, Success, Try}
 
 class MgmtClient(val baseUri: String, val clientId: String, val clientSecret: String, val audience: String, val oauthServiceBaseUrl: String,
-                 val httpClient: CloseableHttpClient = MgmtClient.createHttpClient()) extends Serializable with BatchLookup {
+                 val httpClient: CloseableHttpClient = HttpClients.createDefault()) extends Serializable with BatchLookup {
   private val log = LoggerFactory.getLogger(this.getClass)
   log.info("Creating HRI MgmtClient for {}", baseUri)
 
@@ -130,11 +127,11 @@ class MgmtClient(val baseUri: String, val clientId: String, val clientSecret: St
       response = httpClient.execute(request)
       response.getStatusLine.getStatusCode match {
         case HttpStatus.SC_OK =>
-          log.info("HRI MgmtApi action call successful")
+          log.info("MgmtApi action call successful")
           Success(entityMapper(response.getEntity))
         case status =>
           val msg = status.intValue + ": " + EntityUtils.toString(response.getEntity)
-          log.info("HRI MgmtApi action call failed: {}", msg)
+          log.info("MgmtApi action call failed: {}", msg)
           Failure(new RequestException(msg, status))
       }
     } catch {
@@ -162,44 +159,4 @@ object MgmtClient {
   val hriConsumerScope = "hri_consumer"
   val accessTokenField = "access_token"
   val audienceField = "audience"
-
-  val trustStoreEnv = "HRI_TRUSTSTORE"
-  val trustStorePasswordEnv = "HRI_TRUSTSTORE_PASSWORD"
-
-  /**
-   * If 'HRI_TRUSTSTORE' and 'HRI_TRUSTSTORE_PASSWORD' are set, constructs an Http client using the specified trust
-   * store. If not set, creates a default Http client.
-   * If unable to load the trust store or create the client, an Exception is thrown.
-   * @return a Http client
-   */
-  def createHttpClient() : CloseableHttpClient = {
-    val log = LoggerFactory.getLogger(this.getClass)
-    val trustStorePath = System.getenv(trustStoreEnv)
-    val password = System.getenv(trustStorePasswordEnv)
-
-    if( trustStorePath == null || trustStorePath.isEmpty ) {
-      log.info("HRI_TRUSTSTORE is not set, so creating default Http client")
-      return HttpClients.createDefault()
-    } else if ( password == null || password.isEmpty ) {
-      val msg = trustStoreEnv + " is set, but " + trustStorePasswordEnv + " is not. Both must be empty or set."
-      log.error(msg)
-      throw new IllegalArgumentException(msg)
-    }
-    log.info("Creating Http client with trust store {}", trustStorePath)
-
-    val trustStoreFile = new File(trustStorePath);
-    if (!trustStoreFile.exists() || !trustStoreFile.isFile) {
-      val msg = "Not found or not a file: " + trustStoreFile.getPath
-      log.error(msg);
-      throw new FileNotFoundException(msg);
-    }
-
-    val sslContext = SSLContexts.custom
-      .loadTrustMaterial(trustStoreFile, password.toCharArray)
-      .build
-
-    return HttpClients.custom
-      .setSSLContext(sslContext)
-      .build
-  }
 }

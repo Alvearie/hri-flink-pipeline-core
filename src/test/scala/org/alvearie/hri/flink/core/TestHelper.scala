@@ -88,20 +88,4 @@ object TestHelper {
     buffer.getLong
   }
 
-  // This sets an OS environment variable using reflection, which isn't normally allowed
-  def setEnv(name: String, value: String): Unit = {
-    val env = System.getenv
-    val field = env.getClass.getDeclaredField("m")
-    field.setAccessible(true)
-    field.get(env).asInstanceOf[java.util.Map[String,String]].put(name, value)
-  }
-
-  // This removes an OS environment variable using reflection, which isn't normally allowed
-  def removeEnv(name: String): Unit = {
-    val env = System.getenv
-    val field = env.getClass.getDeclaredField("m")
-    field.setAccessible(true)
-    field.get(env).asInstanceOf[java.util.Map[String,String]].remove(name)
-  }
-
 }

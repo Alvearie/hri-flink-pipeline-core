@@ -9,6 +9,7 @@ package org.alvearie.hri.api
 import java.time.temporal.ChronoUnit
 import java.time.{OffsetDateTime, ZoneOffset}
 import java.util.Base64
+
 import org.apache.http.{Header, HttpStatus, HttpVersion, ProtocolVersion}
 import org.apache.http.message.BasicHttpResponse
 import org.apache.http.client.methods.{CloseableHttpResponse, HttpPost, HttpPut, HttpUriRequest}
@@ -18,13 +19,11 @@ import org.apache.http.util.EntityUtils
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.json.JsonMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import org.alvearie.hri.flink.core.TestHelper
 import org.mockito.ArgumentMatcher
 import org.mockito.scalatest.MockitoSugar
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers._
 
-import java.io.{FileNotFoundException, IOException}
 import scala.util.{Failure, Success}
 
 class MgmtClientTest extends AnyFunSuite with MockitoSugar{
@@ -41,9 +40,6 @@ class MgmtClientTest extends AnyFunSuite with MockitoSugar{
   private val authorizationHeaderName = "Authorization"
   private val audience = "myAudience"
   private val expectedTokenRequestParams = Array("grant_type=client_credentials", "scope=", s"${MgmtClient.hriInternalScope}", s"${MgmtClient.hriConsumerScope}", s"tenant_$tenantId", s"audience=$audience")
-
-  private val trustStorePath = "src/test/resources/truststore.jks"
-  private val trustStorePassword = "test_password"
 
   class RequestMatcherPut(uri: String, bodyElements: Seq[String]) extends ArgumentMatcher[HttpUriRequest] {
     override def matches(request: HttpUriRequest): Boolean = {
@@ -364,61 +360,6 @@ class MgmtClientTest extends AnyFunSuite with MockitoSugar{
         case Success(_) => fail("expected Exception but got success")
         case Failure(_) => //expected failure
       }
-  }
-
-  test("It should return a custom Http client when environment variables are set") {
-    TestHelper.setEnv(MgmtClient.trustStoreEnv, trustStorePath)
-    TestHelper.setEnv(MgmtClient.trustStorePasswordEnv, trustStorePassword)
-
-    val client = MgmtClient.createHttpClient()
-    assert(client != null)
-    // there isn't a way to inspect the client's configuration to ensure the trust store was added
-
-    /**
-     * This is for manual testing against an actual instance running on Kubernetes
-     * 1. Copy the Kubernetes ca.crt from any pod at /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
-     * 2. Import it into src/test/resources/k-truststore.jks with
-       keytool -import -file ca.crt -keystore src/test/resources/k-truststore.jks -storepass test_password -alias kubernetes_ca
-     * 3. Edit /etc/hosts and append `127.0.0.1 hri-mgmt-api`
-     * 4. Then uncomment the lines below and run the test
-     */
-    //val response = client.execute(new HttpGet("https://hri-mgmt-api:1323/hri/healthcheck"))
-    //System.out.println(response.toString)
-
-    // reset environment
-    TestHelper.removeEnv(MgmtClient.trustStoreEnv)
-    TestHelper.removeEnv(MgmtClient.trustStorePasswordEnv)
-  }
-
-  test("It should throw an IllegalArgumentException when the trust store password variable is not set") {
-    TestHelper.setEnv(MgmtClient.trustStoreEnv, trustStorePath)
-
-    assertThrows[IllegalArgumentException](MgmtClient.createHttpClient())
-
-    // reset environment
-    TestHelper.removeEnv(MgmtClient.trustStoreEnv)
-  }
-
-  test("It should throw an IOException when the trust store path is wrong") {
-    TestHelper.setEnv(MgmtClient.trustStoreEnv, "bad/path/to/truststore.jks")
-    TestHelper.setEnv(MgmtClient.trustStorePasswordEnv, trustStorePassword)
-
-    assertThrows[FileNotFoundException](MgmtClient.createHttpClient())
-
-    // reset environment
-    TestHelper.removeEnv(MgmtClient.trustStoreEnv)
-    TestHelper.removeEnv(MgmtClient.trustStorePasswordEnv)
-  }
-
-  test("It should throw an IOException when the trust store password variable is wrong") {
-    TestHelper.setEnv(MgmtClient.trustStoreEnv, trustStorePath)
-    TestHelper.setEnv(MgmtClient.trustStorePasswordEnv, "wrong_password")
-
-    assertThrows[IOException](MgmtClient.createHttpClient())
-
-    // reset environment
-    TestHelper.removeEnv(MgmtClient.trustStoreEnv)
-    TestHelper.removeEnv(MgmtClient.trustStorePasswordEnv)
   }
 
 }

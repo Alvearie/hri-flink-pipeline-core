@@ -19,10 +19,10 @@ import org.scalatest.matchers.should.Matchers._
 class BaseValidationJobPropertiesTest extends AnyFunSuite {
 
   val TopicBase = "ingest.tenant1.da2"
-  val TestInputTopic: String = TopicBase + ".in"
-  val TestTopicArray: Array[String] = TestInputTopic.split('.').init
+  val TestInputTopic = TopicBase + ".in"
+  val TestTopicArray = TestInputTopic.split('.').init
   val TestPassword = "FakePassword"
-  val TestBrokers: Array[String] = Array[String]("broker1:9092","broker2:9092")
+  val TestBrokers = Array[String]("broker1:9092","broker2:9092")
   val TestInputTopic2 = "ingest.22.da3.in"
 
   implicit val hriRecordTypeInfo: TypeInformation[HriRecord] = TypeInformation.of(classOf[HriRecord])
@@ -152,7 +152,7 @@ class BaseValidationJobPropertiesTest extends AnyFunSuite {
     val countsOutputTag: OutputTag[ObjectNode] = new OutputTag[ObjectNode]("counts")
     val baseJob = new BaseValidationJob(TestInputTopic, TestBrokers, TestPassword, (_ => (true,null)) : Validator, "mgmtApiUrl", "mgmtClientId", "mgmtClientSecret", "audience", "https://oauthdomain.com/hri", 100)
     val validationProcessFunction = baseJob.getValidationProcessFunction(notificationDescriptor, invalidOutputTag, countsOutputTag)
-    assert(validationProcessFunction.getUseMgmtApi())
+    assert(validationProcessFunction.getUseMgmtApi() == true)
   }
 
   test("constructs validation process function without mgmt client") {
@@ -161,6 +161,6 @@ class BaseValidationJobPropertiesTest extends AnyFunSuite {
     val countsOutputTag: OutputTag[ObjectNode] = new OutputTag[ObjectNode]("counts")
     val baseJob = new BaseValidationJob(TestInputTopic, TestBrokers, TestPassword, (_ => (true,null)) : Validator, 100)
     val validationProcessFunction = baseJob.getValidationProcessFunction(notificationDescriptor, invalidOutputTag, countsOutputTag)
-    assert(!validationProcessFunction.getUseMgmtApi())
+    assert(validationProcessFunction.getUseMgmtApi() == false)
   }
 }
