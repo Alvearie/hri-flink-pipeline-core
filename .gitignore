@@ -1,0 +1,23 @@
+/build
+
+# IntelliJ
+.idea
+.idea/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+
+# Gradle
+.gradle/
+.gradletasknamecache
+gradle-app.setting
+
+# AppScan on Cloud - ASoC
+/dependencies
+appscan.irx
+appscan_logs.zip
+
+*.class
+*.log
+out
