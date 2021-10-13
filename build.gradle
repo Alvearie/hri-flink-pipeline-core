@@ -124,6 +124,7 @@ ossIndexAudit {
 dependencies {
     // Scala lib
     implementation "org.scala-lang:scala-library:${scalaVersion}"
+    implementation "org.scala-lang:scala-compiler:${scalaVersion}" // flink dependencies below pull in older version with vulnerability, so override here.
 
     // --------------------------------------------------------------
     // Flink dependencies that should not be included as transitive
