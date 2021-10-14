@@ -146,7 +146,7 @@ dependencies {
     compileOnly "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
     compileOnly("org.scala-lang:scala-compiler") {
         version {
-            strictly("${scalaVersion}")
+            require("${scalaVersion}")
         }
     }
     compileOnly "org.apache.logging.log4j:log4j-core:${log4jVersion}"
@@ -155,7 +155,7 @@ dependencies {
     testImplementation "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
     testImplementation("org.scala-lang:scala-compiler") {
         version {
-            strictly("${scalaVersion}")
+            require("${scalaVersion}")
         }
     }
     testImplementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
