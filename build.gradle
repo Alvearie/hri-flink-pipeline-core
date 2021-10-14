@@ -33,7 +33,7 @@ ext {
     scalaVersion = '2.12.11'
     scalaTestVersion = '3.1.1'
     slf4jVersion = '1.7.32'
-    log4jVersion = '1.2.17'
+    log4jVersion = '2.13.2'
     jacksonVersion = '2.12.0'
     branch = System.getenv('BRANCH_NAME') != null
         ? System.getenv('BRANCH_NAME')
@@ -116,7 +116,19 @@ ossIndexAudit {
 
             // pkg:maven/org.apache.pdfbox/xmpbox@2.0.8 (from com.vladsch.flexmark:flexmark-all)
             '32bccbbb-bd3f-44f3-a530-5827a93d74db', '2418a058-dfb7-4303-b1d1-ac5262d9e499', '1be5c4d8-4994-4dd6-92b1-ca53ac7e6a17', 'f984e75c-06bf-43dc-86db-3f8dfe82f430',
-            'bd0f0dd9-1356-4dec-a8a3-edc777cc92d5', 'b70e447a-06a1-48b0-a02b-cd5b78862777'
+            'bd0f0dd9-1356-4dec-a8a3-edc777cc92d5', 'b70e447a-06a1-48b0-a02b-cd5b78862777',
+
+            //pkg:maven/org.apache.commons/commons-compress@1.18 (from org.apache.flink:flink-scala_2.12:1.10.3)
+            //NOTE: these vulnerabilities cannot be eliminated UNTIL we upgrade our Flink version to Flink 1.14.0
+            //Need to get Security Exception until that happens
+            '68232267-bb25-4b04-8dec-caf7c11c7293', '69b8043a-3002-48fa-9762-8f6040d83de1', '4102317d-8250-465e-a46d-179d42792b14',
+            '7a6a9dd2-67de-4e2a-b406-7aa4a4ce29cc', '8ea14e38-e6cc-48d9-bfe4-ec89f93596e7',
+
+            //pkg:maven/org.apache.logging.log4j/log4j-core@2.11.2 (from org.scala-sbt:zinc_2.12:1.3.5 - Used by gradle scala plugin only)
+            'd3477f9c-032a-44a7-a5e1-02ae35e4737c',
+
+            //pkg:maven/log4j/log4j@1.2.17 (from com.vladsch.flexmark:flexmark-all:0.35.10 - Used in Unit Test runs only)
+            'e6e4ebea-da12-4bde-8f24-6272925ad093'
     ]
     // excludeCoordinates = ['commons-fileupload:commons-fileupload:1.3'] // list containing coordinate of components which if vulnerable should be ignored
 }
@@ -130,21 +142,23 @@ dependencies {
     // dependencies of this library, because they should not be
     // included in Flink job jars.
     // --------------------------------------------------------------
-    compileOnly("org.apache.flink:flink-scala_${scalaBinaryVersion}:${flinkVersion}") {
-        exclude group: 'org.scala-lang', module: 'scala-compiler'
+    compileOnly "org.apache.flink:flink-scala_${scalaBinaryVersion}:${flinkVersion}"
+    compileOnly "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
+    compileOnly("org.scala-lang:scala-compiler") {
+        version {
+            strictly("${scalaVersion}")
+        }
     }
-    compileOnly("org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}") {
-        exclude group: 'org.scala-lang', module: 'scala-compiler'
-    }
-    compileOnly "log4j:log4j:${log4jVersion}"
+    compileOnly "org.apache.logging.log4j:log4j-core:${log4jVersion}"
     compileOnly "org.slf4j:slf4j-log4j12:${slf4jVersion}"
-    testImplementation("org.apache.flink:flink-scala_${scalaBinaryVersion}:${flinkVersion}") {
-        exclude group: 'org.scala-lang', module: 'scala-compiler'
+    testImplementation "org.apache.flink:flink-scala_${scalaBinaryVersion}:${flinkVersion}"
+    testImplementation "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
+    testImplementation("org.scala-lang:scala-compiler") {
+        version {
+            strictly("${scalaVersion}")
+        }
     }
-    testImplementation("org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}") {
-        exclude group: 'org.scala-lang', module: 'scala-compiler'
-    }
-    testImplementation "log4j:log4j:${log4jVersion}"
+    testImplementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
     testImplementation "org.slf4j:slf4j-log4j12:${slf4jVersion}"
 
     // --------------------------------------------------------------
