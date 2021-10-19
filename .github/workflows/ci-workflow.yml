@@ -41,7 +41,6 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          docker run -d --name sonarqube -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true -p 9000:9000 sonarqube:latest
           ./gradlew sonarqube -Dsonar.login=$SONAR_TOKEN
 
       - name: Gradle build
