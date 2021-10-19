@@ -38,6 +38,10 @@ jobs:
           echo "ACTIONS_TAG=$TAG_ID" >> $GITHUB_ENV
 
       - name: SonarCloud Scan
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '11'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
