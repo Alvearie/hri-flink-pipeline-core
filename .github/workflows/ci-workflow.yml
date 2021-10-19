@@ -37,6 +37,13 @@ jobs:
           TAG_ID=${GITHUB_REF##*/}
           echo "ACTIONS_TAG=$TAG_ID" >> $GITHUB_ENV
 
+      - name: SonarCloud Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          curl -fsSL https://get.docker.com -o get-docker.sh
+          sudo sh get-docker.sh
+
       - name: Gradle build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
