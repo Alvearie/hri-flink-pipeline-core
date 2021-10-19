@@ -1,51 +1,45 @@
-name: CI Workflow
+name: Code Scans
 
 on:
   push:
-    branches: [ '**' ]
-    tags: [ '**' ]
-  workflow_dispatch:
+    branches: [ 'main', 'develop', 'support-*' ]
+  pull_request:
+    types: [opened, synchronize, reopened]
 
-concurrency: ci-${{ github.ref }}
+concurrency: code-scans-${{ github.ref }}
 
 jobs:
   buildAndTest:
-    name: Build, Test, and Package
+    name: Static Code Analysis
     runs-on: ubuntu-latest
-    env:
-      RESOURCE_GROUP: hri-dev1-wdc-kube
 
     steps:
       - name: Set branch name environment variable
         uses: nelonoel/branch-name@v1.0.1
 
       - uses: actions/checkout@v2
+        with:
+          # full checkout for SonarCloud analysis
+          fetch-depth: 0
 
-      - name: Copyright Check
-        run: ./copyrightCheck.sh
-
-      - name: Set up adoptopenjdk8
+      - name: Set up Java 11
         uses: actions/setup-java@v2
         with:
-          java-version: '8'
+          java-version: '11'
           distribution: 'adopt'
           cache: 'gradle'
 
-      - name: Set GitHub Tag environment variable
-        if: startsWith(github.ref, 'refs/tags/v') == true
+      - name: SonarCloud Scan
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          TAG_ID=${GITHUB_REF##*/}
-          echo "ACTIONS_TAG=$TAG_ID" >> $GITHUB_ENV
+               ./gradlew sonarqube -Dsonar.login=$SONAR_TOKEN --info
 
       - name: Gradle build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew clean build
-
-      - name: Gradle publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew publish
 
       - name: Post Slack Update
         if: ${{ failure() && ( github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/support-') ) }}
