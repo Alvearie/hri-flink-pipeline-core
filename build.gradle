@@ -134,6 +134,16 @@ ossIndexAudit {
     // excludeCoordinates = ['commons-fileupload:commons-fileupload:1.3'] // list containing coordinate of components which if vulnerable should be ignored
 }
 
+sonarqube {
+    properties {
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.projectKey", "Alvearie_hri-flink-pipeline-core"
+        property "sonar.organization", "alvearie"
+        property "sonar.scala.coverage.reportPaths", "./build/reports/scoverage/scoverage.xml,./build/reports/scoverage/cobertura.xml"
+    }
+}
+
 dependencies {
     // Scala lib
     implementation "org.scala-lang:scala-library:${scalaVersion}"
