@@ -9,11 +9,10 @@ package org.alvearie.hri.flink.core
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.util.concurrent.TimeUnit
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.scala.{DefaultScalaModule, ScalaObjectMapper}
-import org.alvearie.hri.api.{BatchLookup, BatchNotification, MgmtClient, RequestException, InvalidRecord}
+import org.alvearie.hri.api.{BatchLookup, BatchNotification, InvalidRecord, MgmtClient, RequestException}
 import org.alvearie.hri.flink.core.serialization.{HriRecord, NotificationRecord}
 import org.apache.flink.api.common.state.MapStateDescriptor
 import org.apache.flink.streaming.api.functions.co.BroadcastProcessFunction
@@ -22,9 +21,10 @@ import org.apache.http.HttpStatus
 import org.apache.kafka.common.header.Headers
 import org.slf4j.LoggerFactory
 
+import java.time
 import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConverters._
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration.{Duration, FiniteDuration}
 
 class ValidationProcessFunction(
                                  notificationDescriptor: MapStateDescriptor[String, BatchNotification],
@@ -52,9 +52,9 @@ class ValidationProcessFunction(
     // so instead generate it on demand
     @transient lazy val mgmtClient: BatchLookup = createMgmtClient()
 
-      var initialBackOff = Duration.apply(1, TimeUnit.SECONDS)
-      var maxBackOff = Duration.apply(5, TimeUnit.MINUTES)
-      var maxRetry = java.time.Duration.ofHours(24)
+      var initialBackOff: FiniteDuration = Duration.apply(1, TimeUnit.SECONDS)
+      var maxBackOff: FiniteDuration = Duration.apply(5, TimeUnit.MINUTES)
+      var maxRetry: time.Duration = java.time.Duration.ofHours(24)
 
     def getUseMgmtApi(): Boolean = {useMgmtApi}
 
@@ -226,8 +226,7 @@ class ValidationProcessFunction(
     def extractBatchId(headers: Headers): String = {
         if (headers != null) {
             return headers.asScala.find(_.key() == "batchId")
-                .map(h => new String(h.value(), StandardCharsets.UTF_8))
-                .getOrElse(null)
+              .map(h => new String(h.value(), StandardCharsets.UTF_8)).orNull
         }
         null
     }

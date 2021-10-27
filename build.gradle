@@ -4,42 +4,59 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.sonatype.gradle.plugins:scan-gradle-plugin:2.2.0"
+    }
+}
+
 plugins {
     // Apply the scala plugin to add support for Scala
     id 'scala'
     id 'maven-publish'
     id "com.github.maiflai.scalatest" version "0.25"
     id "org.scoverage" version "4.0.1"
+    id "org.sonatype.gradle.plugins.scan" version "2.2.0"
+    id "org.sonarqube" version "3.3"
 }
 
 group = 'org.alvearie.hri.flink'
-version = '3.0-1.0.2'
+version = '3.1-1.0.3' // Update version number in releases
 description = """HRI Flink Pipeline Core Library"""
 
 ext {
     javaVersion = '1.8'
-    flinkVersion = '1.10.0'
+    flinkVersion = '1.10.3'
     scalaBinaryVersion = '2.12'
     scalaVersion = '2.12.11'
     scalaTestVersion = '3.1.1'
-    slf4jVersion = '1.7.7'
-    log4jVersion = '1.2.17'
+    slf4jVersion = '1.7.32'
+    log4jVersion = '2.13.2'
     jacksonVersion = '2.12.0'
-    branch = System.getenv('TRAVIS_BRANCH') != null
-        ? System.getenv('TRAVIS_BRANCH')
+    branch = System.getenv('BRANCH_NAME') != null
+        ? System.getenv('BRANCH_NAME')
         : getWorkingBranch()
-
+    ossPassword = findProperty("SONATYPE_OSS_PASSWORD") ?: System.getenv("SONATYPE_OSS_PASSWORD")
 }
 
-// If not running in travis add 'local' to the version to support local development
-if (System.getenv('TRAVIS_BRANCH') == null || System.getenv('TRAVIS_BRANCH') == "") {
+/**
+ * Set the version name
+ * - If developing locally, no BRANCH_NAME should be set and the version suffix is "-local-SNAPSHOT"
+ * - If pushing to a branch, no ACTIONS_TAG should be set and the version suffix is "-SNAPSHOT"
+ * - If pushing to a tag, the tag should match the version number, and the version number is now the version name.
+ * Note: The "should be set" variables are attempted to be set in ci-workflow.yml.
+ */
+if (System.getenv('BRANCH_NAME') == null || System.getenv('BRANCH_NAME') == "") {
     version = "${branch}-local-SNAPSHOT"
-} else if (System.getenv('TRAVIS_TAG') == null || System.getenv('TRAVIS_TAG') == "") {
+} else if (System.getenv('ACTIONS_TAG') == null || System.getenv('ACTIONS_TAG') == "") {
     version = "${branch}-SNAPSHOT"
-} else if (System.getenv('TRAVIS_TAG') == "v${version}") {
+} else if (System.getenv('ACTIONS_TAG') == "v${version}") {
     version = "${version}"
 } else {
-    throw new InvalidUserDataException(String.format("The tag '%s' does not match with the current release version '%s'",System.getenv('TRAVIS_TAG'),"${version}"));
+    throw new InvalidUserDataException(String.format("The tag '%s' does not match with the current release version '%s'",System.getenv('ACTIONS_TAG'),"${version}"));
 }
 
 task jarTests(type: Jar) {
@@ -54,20 +71,79 @@ tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
 }
 
-// declare where to find the dependencies of your project
 repositories {
-    ['TBD'].each { repo ->
-        maven {
-            credentials {
-                username = findProperty('user') ?: System.getenv('user')
-                password = findProperty('password') ?: System.getenv('password')
-            }
-
-            url "TBD/$repo/"
+    maven {
+        url = uri("https://maven.pkg.github.com/Alvearie/hri-api-spec")
+        credentials {
+            username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
+            password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
         }
     }
     mavenCentral()
     mavenLocal()
+}
+
+ossIndexAudit {
+    username = 'hribld@us.ibm.com'
+    password = "${ossPassword}"
+    allConfigurations = true // if true includes the dependencies in all resolvable configurations. By default is false, meaning only 'compileClasspath', 'runtimeClasspath', 'releaseCompileClasspath' and 'releaseRuntimeClasspath' are considered
+    useCache = true // true by default
+    cacheExpiration = 'PT86400S' // note: time in seconds (24hrs); 12 hours if omitted. It must follow the Joda Time specification at https://www.javadoc.io/doc/joda-time/joda-time/2.10.4/org/joda/time/Duration.html#parse-java.lang.String-
+    colorEnabled = true // if true prints vulnerability description in color. By default is true.
+    printBanner = true // if true will print ASCII text banner. By default is true.
+
+    // Vulnerabilities that can safely be ignored
+    excludeVulnerabilityIds = [
+            // pkg:maven/org.apache.zookeeper/zookeeper@3.4.8 (from flink-test-utils)
+            '1775f19b-5e9c-48f8-8c8f-ef245350531b', '43b8cbe5-324d-416b-b613-3dcaba1b5a6c', 'bec057e0-9945-49c4-92c9-4be669bb5331', '1e65ed27-7a06-4464-a115-c8421c879281',
+
+            // pkg:maven/io.netty/netty@3.7.0.Final (from flink-test-utils)
+            '20be5124-16a3-4d77-8668-d83f04a67808', '20167979-f872-4765-85ef-9b7be870cecb', 'f2a31abe-1af6-4f6f-aeeb-60e0e0d3e981', '6ff63cbd-c4ae-4268-be95-43322746b6be',
+            '8b7d8928-61ee-4708-bf37-feece927a872', 'cbde3175-9c07-491c-836d-2a146b61e3b6', '846fbf13-a0b9-4cab-b820-8415a30326bd', 'b3c3a56f-37c0-4706-bf54-2f61c5c9786f',
+            'a3df5795-2bdb-4ec6-b9c2-babe9ec470e5', '20b79835-7a43-4bea-a985-5e12df1d0b0a',
+            // pkg:maven/io.netty/netty@3.7.0.Final (from Snappy and Bzip2 compression components.  Can’t force Flink to upgrade, and not used in Flink.)
+            '14ed6543-1974-4241-b353-3afd846eadc9', '99b9cf63-0f91-43fb-b227-e53917370ed9',
+
+            // pkg:maven/com.google.guava/guava@16.0.1 (from flink-test-utils)
+            '24585a7f-eb6b-4d8d-a2a9-a6f16cc7c1d0', '8e973be2-4220-410d-a4cb-2de7a755bdbe',
+
+            // pkg:maven/junit/junit@4.12 (from flink-test-utils)
+            '7ea56ad4-8a8b-4e51-8ed9-5aad83d8efb1',
+
+            // pkg:maven/org.jsoup/jsoup@1.10.2 (from com.vladsch.flexmark:flexmark-all)
+            '5dbdb043-212c-4971-9653-d04e1cfc5080',
+
+            // pkg:maven/org.apache.pdfbox/pdfbox@2.0.8 (from com.vladsch.flexmark:flexmark-all)
+            '32bccbbb-bd3f-44f3-a530-5827a93d74db', '2418a058-dfb7-4303-b1d1-ac5262d9e499', '1be5c4d8-4994-4dd6-92b1-ca53ac7e6a17', 'f984e75c-06bf-43dc-86db-3f8dfe82f430',
+            'bd0f0dd9-1356-4dec-a8a3-edc777cc92d5', 'b70e447a-06a1-48b0-a02b-cd5b78862777',
+
+            // pkg:maven/org.apache.pdfbox/xmpbox@2.0.8 (from com.vladsch.flexmark:flexmark-all)
+            '32bccbbb-bd3f-44f3-a530-5827a93d74db', '2418a058-dfb7-4303-b1d1-ac5262d9e499', '1be5c4d8-4994-4dd6-92b1-ca53ac7e6a17', 'f984e75c-06bf-43dc-86db-3f8dfe82f430',
+            'bd0f0dd9-1356-4dec-a8a3-edc777cc92d5', 'b70e447a-06a1-48b0-a02b-cd5b78862777',
+
+            //pkg:maven/org.apache.commons/commons-compress@1.18 (from org.apache.flink:flink-scala_2.12:1.10.3)
+            //NOTE: these vulnerabilities cannot be eliminated UNTIL we upgrade our Flink version to Flink 1.14.0
+            //Need to get Security Exception until that happens
+            '68232267-bb25-4b04-8dec-caf7c11c7293', '69b8043a-3002-48fa-9762-8f6040d83de1', '4102317d-8250-465e-a46d-179d42792b14',
+            '7a6a9dd2-67de-4e2a-b406-7aa4a4ce29cc', '8ea14e38-e6cc-48d9-bfe4-ec89f93596e7',
+
+            //pkg:maven/org.apache.logging.log4j/log4j-core@2.11.2 (from org.scala-sbt:zinc_2.12:1.3.5 - Used by gradle scala plugin only)
+            'd3477f9c-032a-44a7-a5e1-02ae35e4737c',
+
+            //pkg:maven/log4j/log4j@1.2.17 (from com.vladsch.flexmark:flexmark-all:0.35.10 - Used in Unit Test runs only)
+            'e6e4ebea-da12-4bde-8f24-6272925ad093',
+    ]
+    // excludeCoordinates = ['commons-fileupload:commons-fileupload:1.3'] // list containing coordinate of components which if vulnerable should be ignored
+}
+
+sonarqube {
+    properties {
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.projectKey", "Alvearie_hri-flink-pipeline-core"
+        property "sonar.organization", "alvearie"
+        property "sonar.scala.coverage.reportPaths", "./build/reports/scoverage/scoverage.xml,./build/reports/scoverage/cobertura.xml"
+    }
 }
 
 dependencies {
@@ -75,24 +151,34 @@ dependencies {
     implementation "org.scala-lang:scala-library:${scalaVersion}"
 
     // --------------------------------------------------------------
-    // Flink dependencies that should not be included as transitive 
-    // dependencies of this library, because they should not be 
+    // Flink dependencies that should not be included as transitive
+    // dependencies of this library, because they should not be
     // included in Flink job jars.
     // --------------------------------------------------------------
     compileOnly "org.apache.flink:flink-scala_${scalaBinaryVersion}:${flinkVersion}"
     compileOnly "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
-    compileOnly "log4j:log4j:${log4jVersion}"
+    compileOnly("org.scala-lang:scala-compiler") {
+        version {
+            require("${scalaVersion}")
+        }
+    }
+    compileOnly "org.apache.logging.log4j:log4j-core:${log4jVersion}"
     compileOnly "org.slf4j:slf4j-log4j12:${slf4jVersion}"
     testImplementation "org.apache.flink:flink-scala_${scalaBinaryVersion}:${flinkVersion}"
     testImplementation "org.apache.flink:flink-streaming-scala_${scalaBinaryVersion}:${flinkVersion}"
-    testImplementation "log4j:log4j:${log4jVersion}"
+    testImplementation("org.scala-lang:scala-compiler") {
+        version {
+            require("${scalaVersion}")
+        }
+    }
+    testImplementation "org.apache.logging.log4j:log4j-core:${log4jVersion}"
     testImplementation "org.slf4j:slf4j-log4j12:${slf4jVersion}"
 
     // --------------------------------------------------------------
     // Dependencies that library users should include in their job
     // shadow jar
     // --------------------------------------------------------------
-    implementation "org.alvearie.hri:hri-api-batch-notification:3.0-2.0.1"
+    implementation "org.alvearie.hri:hri-api-batch-notification:3.1-2.0.2"
     implementation "org.apache.flink:flink-connector-kafka_${scalaBinaryVersion}:${flinkVersion}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     implementation "com.fasterxml.jackson.module:jackson-module-scala_${scalaBinaryVersion}:${jacksonVersion}"
@@ -110,9 +196,10 @@ dependencies {
     testImplementation "org.apache.flink:flink-runtime_${scalaBinaryVersion}:${flinkVersion}:tests"
     testImplementation "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}:tests"
 
+
     testRuntimeOnly "com.vladsch.flexmark:flexmark-all:0.35.10"
-    testRuntime 'org.pegdown:pegdown:1.4.2'
-    testCompile "info.picocli:picocli:4.2.0"
+    testRuntimeOnly 'org.pegdown:pegdown:1.6.0'
+    testImplementation 'info.picocli:picocli:4.6.1'
 }
 
 publishing {
@@ -121,6 +208,7 @@ publishing {
             from components.java
             artifactId = 'hri-flink-pipeline-core'
         }
+
         mavenJava(MavenPublication) {
             artifact jarTests
         }
@@ -128,10 +216,11 @@ publishing {
 
     repositories {
         maven {
-            url 'TBD'
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Alvearie/hri-flink-pipeline-core")
             credentials {
-                username findProperty('user') ?: System.getenv('user')
-                password findProperty('password') ?: System.getenv('password')
+               username = findProperty("GITHUB_ACTOR") ?: System.getenv("GITHUB_ACTOR")
+               password = findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN")
             }
         }
     }
@@ -148,6 +237,7 @@ scoverage {
     coverageOutputXML = true
     coverageOutputHTML = true
 }
+
 reportScoverage.doLast {
     println "Scoverage report:\n  file:///$buildDir/reports/scoverage/index.html"
 }
@@ -166,7 +256,5 @@ def getWorkingBranch() {
     def workingBranch = """git --git-dir=${rootDir}/.git
                                --work-tree=${rootDir}
                                rev-parse --abbrev-ref HEAD""".execute().text.trim()
-    println "Working branch: " + workingBranch
     return workingBranch
 }
-

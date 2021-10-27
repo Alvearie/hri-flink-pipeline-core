@@ -58,7 +58,7 @@ class ValidationProcessFunctionTest extends AnyFunSuite with MockitoSugar {
 
   NotificationDescriptor.enableTimeToLive(getStateTtlConfig)
 
-  test("processElement should call getBatch, retry call HRI mgmtClient and return batchNotification") {
+  test("processElement should call getBatch, retry call mgmtClient and return batchNotification") {
     val mockClient = mock[MgmtClient]
 
     val batchNotification = createTestBatchNotification(DefaultTestBatchId, BatchNotification.Status.SEND_COMPLETED, DefaultTestRecordCount)
@@ -126,7 +126,7 @@ class ValidationProcessFunctionTest extends AnyFunSuite with MockitoSugar {
     thrown.getMessage should startWith("Reached max HRI Management API retry timeout of")
   }
 
-  test("processElement should ship records to invalid output when the batch Id is not in the broadcast state and HRI mgmtClient responds with 'Not Found'") {
+  test("processElement should ship records to invalid output when the batch Id is not in the broadcast state and mgmtClient responds with 'Not Found'") {
     val mockClient = mock[MgmtClient]
 
     val validator = new TestValidationProcessFunction(

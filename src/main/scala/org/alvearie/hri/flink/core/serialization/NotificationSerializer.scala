@@ -18,7 +18,7 @@ import scala.tools.jline_embedded.internal.Nullable
 /**
  * An implementation of a KafkaSerializationSchema, which encodes the Value as a BatchNotification.
  * It is expected that this class will be used by HRI Flink processors to handle "notification" records. These
- * records are produced by the HRI Mgmt-API in a known format and Flink processors must have access to the individual
+ * records are produced by the hri-mgmt-api in a known format and Flink processors must have access to the individual
  * field values within the message.
  *
  * @param topic Kafka topic to be inserted in serialized ProducerRecords

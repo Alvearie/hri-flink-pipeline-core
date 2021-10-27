@@ -12,7 +12,6 @@ import org.apache.kafka.common.header.internals.RecordHeader
 import org.apache.kafka.common.header.internals.RecordHeaders
 
 class TestRecordHeaders extends RecordHeaders with Serializable {
-
   private val serialVersionUID = - 1749935200821233226L
 
   private def writeObject(oos: ObjectOutputStream): Unit = {
