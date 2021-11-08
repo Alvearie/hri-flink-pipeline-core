@@ -60,7 +60,7 @@ class HriRecordDeserializerTest extends AnyFunSuite {
 
     test("Null headers should be preserved") {
         val deserializer = new HriRecordDeserializer
-        val consumerRecord = createConsumerRecord(null, FakeKey, FakeBody)
+        val consumerRecord = createConsumerRecordWithoutHeaders(FakeKey, FakeBody)
 
         val record = deserializer.deserialize(consumerRecord)
         val actualHeaders = record.headers
@@ -70,7 +70,7 @@ class HriRecordDeserializerTest extends AnyFunSuite {
         val actualPartition = record.partition
         val actualOffset = record.offset
 
-        actualHeaders should be(null)
+        actualHeaders.toArray shouldBe empty
         actualKey should equal(ExpectedKey)
         actualBody should equal(ExpectedBody)
         actualTopic should equal(TopicName)
@@ -80,7 +80,7 @@ class HriRecordDeserializerTest extends AnyFunSuite {
 
     test("Null key should be preserved") {
         val deserializer = new HriRecordDeserializer
-        val consumerRecord = createConsumerRecord(null, null, FakeBody)
+        val consumerRecord = createConsumerRecordWithoutHeaders(null, FakeBody)
 
         val record = deserializer.deserialize(consumerRecord)
         val actualHeaders = record.headers
@@ -90,7 +90,7 @@ class HriRecordDeserializerTest extends AnyFunSuite {
         val actualPartition = record.partition
         val actualOffset = record.offset
 
-        actualHeaders should be(null)
+        actualHeaders.toArray shouldBe empty
         actualKey should be(null)
         actualBody should equal(ExpectedBody)
         actualTopic should equal(TopicName)
@@ -100,7 +100,7 @@ class HriRecordDeserializerTest extends AnyFunSuite {
 
     test("Null body should be preserved") {
         val deserializer = new HriRecordDeserializer
-        val consumerRecord = createConsumerRecord(null, null, null)
+        val consumerRecord = createConsumerRecordWithoutHeaders(null, null)
 
         val record = deserializer.deserialize(consumerRecord)
         val actualHeaders = record.headers
@@ -110,7 +110,7 @@ class HriRecordDeserializerTest extends AnyFunSuite {
         val actualPartition = record.partition
         val actualOffset = record.offset
 
-        actualHeaders should be(null)
+        actualHeaders.toArray shouldBe empty
         actualKey should be(null)
         actualBody should be(null)
         actualTopic should equal(TopicName)
@@ -170,4 +170,18 @@ class HriRecordDeserializerTest extends AnyFunSuite {
         )
     }
 
+    def createConsumerRecordWithoutHeaders(key: Array[Byte], value: Array[Byte]): ConsumerRecord[Array[Byte], Array[Byte]] = {
+        new ConsumerRecord[Array[Byte], Array[Byte]](
+            TopicName,
+            Partition,
+            Offset,
+            ConsumerRecord.NO_TIMESTAMP,
+            TimestampType.NO_TIMESTAMP_TYPE,
+            ConsumerRecord.NULL_CHECKSUM.toLong,
+            ConsumerRecord.NULL_SIZE,
+            ConsumerRecord.NULL_SIZE,
+            key,
+            value,
+        )
+    }
 }

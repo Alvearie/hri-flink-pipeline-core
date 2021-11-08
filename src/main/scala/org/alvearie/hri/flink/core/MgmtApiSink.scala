@@ -40,7 +40,7 @@ class MgmtApiSink(val tenantId: String, val mgmtApiUrl: String, val mgmtClientId
     }
   }
 
-  override def invoke(record: NotificationRecord, context: Context[_]): Unit = {
+  override def invoke(record: NotificationRecord, context: Context): Unit = {
     val batch = record.value
     log.info("Received Batch {} with status of {}", batch.getId: Any, batch.getStatus: Any)
     batch.getStatus match {
