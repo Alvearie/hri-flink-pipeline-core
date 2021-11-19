@@ -24,12 +24,12 @@ plugins {
 }
 
 group = 'org.alvearie.hri.flink'
-version = '3.1-1.0.3' // Update version number in releases
+version = '3.2-1.1.0' // Update version number in releases
 description = """HRI Flink Pipeline Core Library"""
 
 ext {
     javaVersion = '1.8'
-    flinkVersion = '1.10.3'
+    flinkVersion = '1.14.0'
     scalaBinaryVersion = '2.12'
     scalaVersion = '2.12.11'
     scalaTestVersion = '3.1.1'
@@ -121,12 +121,6 @@ ossIndexAudit {
             '32bccbbb-bd3f-44f3-a530-5827a93d74db', '2418a058-dfb7-4303-b1d1-ac5262d9e499', '1be5c4d8-4994-4dd6-92b1-ca53ac7e6a17', 'f984e75c-06bf-43dc-86db-3f8dfe82f430',
             'bd0f0dd9-1356-4dec-a8a3-edc777cc92d5', 'b70e447a-06a1-48b0-a02b-cd5b78862777',
 
-            //pkg:maven/org.apache.commons/commons-compress@1.18 (from org.apache.flink:flink-scala_2.12:1.10.3)
-            //NOTE: these vulnerabilities cannot be eliminated UNTIL we upgrade our Flink version to Flink 1.14.0
-            //Need to get Security Exception until that happens
-            '68232267-bb25-4b04-8dec-caf7c11c7293', '69b8043a-3002-48fa-9762-8f6040d83de1', '4102317d-8250-465e-a46d-179d42792b14',
-            '7a6a9dd2-67de-4e2a-b406-7aa4a4ce29cc', '8ea14e38-e6cc-48d9-bfe4-ec89f93596e7',
-
             //pkg:maven/org.apache.logging.log4j/log4j-core@2.11.2 (from org.scala-sbt:zinc_2.12:1.3.5 - Used by gradle scala plugin only)
             'd3477f9c-032a-44a7-a5e1-02ae35e4737c',
 
@@ -178,7 +172,7 @@ dependencies {
     // Dependencies that library users should include in their job
     // shadow jar
     // --------------------------------------------------------------
-    implementation "org.alvearie.hri:hri-api-batch-notification:3.1-2.0.2"
+    implementation "org.alvearie.hri:hri-api-batch-notification:3.2-2.0.3"
     implementation "org.apache.flink:flink-connector-kafka_${scalaBinaryVersion}:${flinkVersion}"
     implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
     implementation "com.fasterxml.jackson.module:jackson-module-scala_${scalaBinaryVersion}:${jacksonVersion}"
@@ -193,7 +187,7 @@ dependencies {
     testImplementation "org.mockito:mockito-scala-scalatest_${scalaBinaryVersion}:1.14.4"
     testImplementation "org.apache.flink:flink-tests:${flinkVersion}:tests"
     testImplementation "org.apache.flink:flink-test-utils_${scalaBinaryVersion}:${flinkVersion}"
-    testImplementation "org.apache.flink:flink-runtime_${scalaBinaryVersion}:${flinkVersion}:tests"
+    testImplementation "org.apache.flink:flink-runtime:${flinkVersion}:tests"
     testImplementation "org.apache.flink:flink-streaming-java_${scalaBinaryVersion}:${flinkVersion}:tests"
 
 

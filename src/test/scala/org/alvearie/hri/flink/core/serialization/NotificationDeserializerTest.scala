@@ -67,42 +67,42 @@ class NotificationDeserializerTest extends AnyFunSuite {
 
     test("Null headers should be preserved") {
         val deserializer = new NotificationDeserializer()
-        val consumerRecord = createConsumerRecord(null, FakeKey, FakeNotification)
+        val consumerRecord = createConsumerRecordWithoutHeaders(FakeKey, FakeNotification)
 
         val record = deserializer.deserialize(consumerRecord)
         val actualHeaders = record.headers
         val actualKey = new String(record.key, StandardCharsets.UTF_8)
         val actualNotification = record.value
 
-        actualHeaders should be(null)
+        actualHeaders.toArray shouldBe empty
         actualKey should equal(ExpectedKey)
         actualNotification should equal(ExpectedNotification)
     }
 
     test("Null key should be preserved") {
         val deserializer = new NotificationDeserializer()
-        val consumerRecord = createConsumerRecord(null, null, FakeNotification)
+        val consumerRecord = createConsumerRecordWithoutHeaders(null, FakeNotification)
 
         val record = deserializer.deserialize(consumerRecord)
         val actualHeaders = record.headers
         val actualKey = record.key
         val actualNotification = record.value
 
-        actualHeaders should be(null)
+        actualHeaders.toArray shouldBe empty
         actualKey should be(null)
         actualNotification should equal(ExpectedNotification)
     }
 
     test("Null body should be preserved") {
         val deserializer = new NotificationDeserializer()
-        val consumerRecord = createConsumerRecord(null, null, null)
+        val consumerRecord = createConsumerRecordWithoutHeaders(null, null)
 
         val record = deserializer.deserialize(consumerRecord)
         val actualHeaders = record.headers
         val actualKey = record.key
         val actualNotification = record.value
 
-        actualHeaders should be(null)
+        actualHeaders.toArray shouldBe empty
         actualKey should be(null)
         actualNotification should equal(null)
     }
@@ -138,7 +138,6 @@ class NotificationDeserializerTest extends AnyFunSuite {
         headers
     }
 
-
     def createConsumerRecord(headers: Headers, key: Array[Byte], value: Array[Byte]): ConsumerRecord[Array[Byte], Array[Byte]] = {
         new ConsumerRecord[Array[Byte], Array[Byte]](
             TopicName,
@@ -152,6 +151,21 @@ class NotificationDeserializerTest extends AnyFunSuite {
             key,
             value,
             headers
+        )
+    }
+
+    def createConsumerRecordWithoutHeaders(key: Array[Byte], value: Array[Byte]): ConsumerRecord[Array[Byte], Array[Byte]] = {
+        new ConsumerRecord[Array[Byte], Array[Byte]](
+            TopicName,
+            Partition,
+            Offset,
+            ConsumerRecord.NO_TIMESTAMP,
+            TimestampType.NO_TIMESTAMP_TYPE,
+            ConsumerRecord.NULL_CHECKSUM.toLong,
+            ConsumerRecord.NULL_SIZE,
+            ConsumerRecord.NULL_SIZE,
+            key,
+            value,
         )
     }
 
@@ -170,5 +184,4 @@ class NotificationDeserializerTest extends AnyFunSuite {
           .withInvalidThreshold(10)
           .withFailureMessage("")
     }
-
 }
