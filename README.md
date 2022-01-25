@@ -68,7 +68,7 @@ Next, these are the steps to actively test your work in hri-flink-pipeline-core 
 After you pass all the tests, create a PR, have the PR approved, merge/rebase this branch back into develop, and then delete this branch... The very last step is to delete the hri-flink-validation branch you made.
 
 ## Releases
-Releases are created by creating Git tags, which trigger a GitHub Actions build that publishes a release version in GitHub packages, see [Overall strategy](https://github.com/Alvearie/HRI/wiki/Overall-Project-Branching,-Test,-and-Release-Strategy) for more details.
+Releases are created by creating Git tags, which trigger a GitHub Actions build that publishes a release version in GitHub packages.
 
 ## Contribution Guide
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
